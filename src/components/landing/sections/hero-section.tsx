@@ -208,29 +208,28 @@ export default function HeroSection() {
   useEffect(() => {
     const section = sectionRef.current;
     if (!section) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-
-          const ratio = entry.intersectionRatio;
-          
-          if (ratio <= 0.8) {
-            const opacity = ratio; 
-            setMountainOpacity(opacity);
-          } else {
-            setMountainOpacity(1);
-          }
-        });
-      },
-      {
-        threshold: Array.from({ length: 51 }, (_, i) => i * 0.02), // Check every 2%
+const observer = new IntersectionObserver(
+  (entries) => {
+    entries.forEach((entry) => {
+      const ratio = entry.intersectionRatio;
+      
+      if (ratio >= 0.7) {
+        setMountainOpacity(1);
+      } else if (ratio > 0.3) {
+        // Map ratio from [0.3, 0.7] to opacity [0, 1]
+        const opacity = (ratio - 0.3) / (0.7 - 0.3);
+        setMountainOpacity(opacity);
+      } else {
+        setMountainOpacity(0);
       }
-    );
-
-    observer.observe(section);
-
-    return () => observer.disconnect();
+    });
+  },
+  {
+    threshold: Array.from({ length: 51 }, (_, i) => i * 0.02), // Check every 2%
+  }
+);
+observer.observe(section);
+return () => observer.disconnect();
   }, []);
 
   const handlePhoneChange = (value: string) => {
