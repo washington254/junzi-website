@@ -189,6 +189,8 @@ export default function HeroSection() {
   const { submitForm } = useHubSpot();
   const [isSubmittingForm, setIsSubmittingForm] = useState(false);
   const [phoneValue, setPhoneValue] = useState("");
+  const [mountainOpacity, setMountainOpacity] = useState(1);
+  const sectionRef = useRef<HTMLElement>(null);
 
   const {
     register,
@@ -201,6 +203,35 @@ export default function HeroSection() {
   } = useForm<FormValues>({
     resolver: yupResolver(schema),
   });
+
+  // Intersection observer to fade out mountain background
+  useEffect(() => {
+    const section = sectionRef.current;
+    if (!section) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+
+          const ratio = entry.intersectionRatio;
+          
+          if (ratio <= 0.8) {
+            const opacity = ratio; 
+            setMountainOpacity(opacity);
+          } else {
+            setMountainOpacity(1);
+          }
+        });
+      },
+      {
+        threshold: Array.from({ length: 51 }, (_, i) => i * 0.02), // Check every 2%
+      }
+    );
+
+    observer.observe(section);
+
+    return () => observer.disconnect();
+  }, []);
 
   const handlePhoneChange = (value: string) => {
     setPhoneValue(value);
@@ -255,10 +286,18 @@ export default function HeroSection() {
   };
   return (
     <section
+      ref={sectionRef}
       className="relative min-h-screen flex items-center justify-center overflow-hidden backdrop-blur-[100px] bg-gray-50"
     >
       {/* Mountain Background */}
-      <div className="absolute inset-0 w-full h-full bg-" style={{ zIndex: 5 }}>
+      <div
+        className="absolute inset-0 w-full h-full bg-"
+        style={{
+          zIndex: 5,
+          opacity: mountainOpacity,
+          transition: 'opacity 0.1s ease-out'
+        }}
+      >
         <MountainBackground />
       </div>
 
@@ -331,7 +370,7 @@ export default function HeroSection() {
 
 
       {/* Content Container */}
-  
+
     </section>
   );
 }
