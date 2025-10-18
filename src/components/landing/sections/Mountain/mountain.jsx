@@ -1,12 +1,21 @@
 'use client';
 
-import { Canvas } from '@react-three/fiber';
+import { Canvas, extend } from '@react-three/fiber';
 import { Cloud, Clouds } from '@react-three/drei';
 import { Bloom, EffectComposer, ToneMapping } from '@react-three/postprocessing';
+import * as THREE from 'three';
 
 import Plane from './components/Plane';
 import Grid from './components/Grid';
 
+class CloudMaterial extends THREE.MeshBasicMaterial {
+  constructor() {
+    super();
+    this.fog = false;
+  }
+}
+
+extend({ CloudMaterial });
 function MountainBackground() {
   // Static values instead of Leva controls
   const cloudRadius = 2;
@@ -14,8 +23,8 @@ function MountainBackground() {
   const cloudScale = 0.13;
   const cloudOpacity = 0.9;
   const cloudSpeed = 0.2;
-  const cloudColor = '#4d4d6f';
-  const bloom = 4;
+  const cloudColor = '#232474';
+  const bloom = 2;
   const fogColor = '#000';
   const fogNear = 2;
   const fogFar = 3;
@@ -24,33 +33,32 @@ function MountainBackground() {
     <div className="absolute inset-0 w-full h-full">
       <Canvas
         style={{ backgroundColor: '#232454' }}
-        gl={{ transparent: true }}
         shadows
-        camera={{ position: [0, -0.5, 6], fov: 40, far: 13 }}
+        camera={{ position: [0, -0.5, 6], fov: 50, far: 13 }}
       >
         <fog attach="fog" args={[fogColor, fogNear, fogFar]} />
         <ambientLight intensity={Math.PI / 2} />
         <Grid />
         <Plane />
 
-        <Clouds>
-          <Cloud
-            position={[-cloudRadius, cloudHeight, 0]}
-            speed={cloudSpeed}
-            opacity={cloudOpacity}
-            scale={[cloudScale, cloudScale, cloudScale]}
-            color={cloudColor}
-            seed={1}
-          />
-          <Cloud
-            position={[cloudRadius, cloudHeight, 0]}
-            speed={cloudSpeed}
-            opacity={cloudOpacity}
-            scale={[cloudScale, cloudScale, cloudScale]}
-            color={cloudColor}
-            seed={1}
-          />
-        </Clouds>
+        <Clouds material={CloudMaterial}>
+            <Cloud
+              position={[-cloudRadius, cloudHeight, 0]}
+              speed={cloudSpeed}
+              opacity={cloudOpacity}
+              scale={[cloudScale, cloudScale, cloudScale]}
+              color={cloudColor}
+              seed={1}
+            />
+            <Cloud
+              position={[cloudRadius, cloudHeight, 0]}
+              speed={cloudSpeed}
+              opacity={cloudOpacity}
+              scale={[cloudScale, cloudScale, cloudScale]}
+              color={cloudColor}
+              seed={1}
+            />
+          </Clouds>
 
         <EffectComposer>
           <Bloom
